@@ -20,6 +20,7 @@ public class BaseResponse<T> {
         this.isSuccess = BaseResponseSuccessStatus.SUCCESS.isSuccess();
         this.message = BaseResponseSuccessStatus.SUCCESS.getMessage();
         this.code = BaseResponseSuccessStatus.SUCCESS.getCode();
+        this.data = data;
     }
 
     // 요청 성공 Custom

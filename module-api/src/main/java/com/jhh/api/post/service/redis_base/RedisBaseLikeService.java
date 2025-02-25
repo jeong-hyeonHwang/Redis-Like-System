@@ -11,4 +11,6 @@ public interface RedisBaseLikeService {
     Integer getPostLikeCount(Integer postId);
 
     Integer getCommentLikeCount(Integer postId, Integer commentId);
+
+    boolean isUserLikedPost(Integer userId, Integer postId);
 }

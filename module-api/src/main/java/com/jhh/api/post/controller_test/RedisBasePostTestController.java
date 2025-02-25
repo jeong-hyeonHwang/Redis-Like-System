@@ -3,7 +3,9 @@ package com.jhh.api.post.controller_test;
 import com.jhh.api.common.response.BaseResponse;
 import com.jhh.api.post.dto.CommentLikeDto;
 import com.jhh.api.post.dto.PostLikeDto;
+import com.jhh.api.post.dto.PostResponseDto;
 import com.jhh.api.post.service.redis_base.RedisBaseLikeService;
+import com.jhh.api.post.service.redis_base.RedisBasePostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +14,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RedisBasePostTestController {
 
+    private final RedisBasePostService redisBasePostService;
     private final RedisBaseLikeService redisBaseLikeService;
 
     @PostMapping("/{userId}/{postId}/like")
     public BaseResponse<PostLikeDto> likePost(@PathVariable Integer userId,
                                               @PathVariable Integer postId) {
         PostLikeDto dto = redisBaseLikeService.likePost(userId, postId);
+        return BaseResponse.ok(dto);
+    }
+
+    @GetMapping("/{userId}/{postId}")
+    public BaseResponse<PostResponseDto> getPost(@PathVariable Integer userId,
+                                                 @PathVariable Integer postId) {
+        PostResponseDto dto = redisBasePostService.getPost(userId, postId);
         return BaseResponse.ok(dto);
     }
 

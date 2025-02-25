@@ -37,7 +37,7 @@ public class DBBasePostController {
     }
 
     @PostMapping("/{postId}/{commentId}/like")
-    public BaseResponse<CommentLikeDto> likePost(@AuthenticationPrincipal Jwt jwt,
+    public BaseResponse<CommentLikeDto> likeComment(@AuthenticationPrincipal Jwt jwt,
                                                  @PathVariable Integer postId,
                                                  @PathVariable Integer commentId) {
         Integer userId = Integer.valueOf(jwt.getId());

@@ -29,14 +29,14 @@ public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
     @Override
     public PostLikeDto likePost(Integer userId, Integer postId) {
         // 포스트와 사용자 엔티티를 먼저 조회
-        postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
+//        postRepository.findById(postId)
+//                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
+//        userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
 
         String postHash = getPostKey(postId);
         String postHashKey = getPostLikeCountHashKey();
-        String userHash = getUserKey(postId);
+        String userHash = getUserKey(userId);
         String userPostHashKey = getPostLikeUserHashKey(postId);
 
 //        redisTemplate.multi();
@@ -65,7 +65,7 @@ public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
 
         String postHash = getPostKey(postId);
         String commentHashKey = getCommentLikeCountHashKey(commentId);
-        String userHash = getUserKey(postId);
+        String userHash = getUserKey(userId);
         String userCommentHashKey = getCommentLikeHashKey(postId);
 
         redisTemplate.multi();
@@ -87,8 +87,16 @@ public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
     public Integer getPostLikeCount(Integer postId) {
         String postHash = getPostKey(postId);
         String postHashKey = getPostLikeCountHashKey();
-        LikeCountDto dto =  likeCountHashOperations.get(postHash, postHashKey);
-        return dto.getLikeCount();
+        Object value =  likeCountHashOperations.get(postHash, postHashKey);
+        if (value == null) {
+            return 0;
+        } else if (value instanceof Number) {
+            return ((Number) value).intValue();
+        } else if (value instanceof LikeCountDto) {
+            return ((LikeCountDto) value).getLikeCount();
+        } else {
+            throw new IllegalStateException("Unexpected type stored in Redis for like count: " + value.getClass());
+        }
     }
 
     @Override
@@ -97,6 +105,14 @@ public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
         String commentHashKey = getCommentLikeCountHashKey(commentId);
         LikeCountDto dto =  likeCountHashOperations.get(postHash, commentHashKey);
         return dto.getLikeCount();
+    }
+
+    @Override
+    public boolean isUserLikedPost(Integer userId, Integer postId) {
+        String userHash = getUserKey(userId);
+        String userPostHashKey = getPostLikeUserHashKey(postId);
+
+        return isUserLikedPost(userHash, userPostHashKey);
     }
 
     private boolean isUserLikedPost(String hash, String hashKey) {

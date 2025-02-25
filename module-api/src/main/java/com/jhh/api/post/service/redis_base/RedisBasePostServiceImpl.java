@@ -1,4 +1,4 @@
-package com.jhh.api.post.service.db_base;
+package com.jhh.api.post.service.redis_base;
 
 import com.jhh.api.common.exception.NotFoundException;
 import com.jhh.api.common.response.BaseResponseErrorStatus;
@@ -9,18 +9,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class DBBasePostServiceImpl implements DBBasePostService {
+public class RedisBasePostServiceImpl implements RedisBasePostService {
     private final CustomPostRepository customPostRepository;
+    private final RedisBaseLikeService redisBaseLikeService;
 
     @Override
     public PostResponseDto getPost(Integer userId, Integer postId) {
-        return customPostRepository.getPostById(userId, postId)
+        PostResponseDto dto = customPostRepository.getPostById3(userId, postId)
                 .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
-    }
 
-    @Override
-    public PostResponseDto getPost2(Integer userId, Integer postId) {
-        return customPostRepository.getPostById2(userId, postId)
-                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
+        dto.setLiked(redisBaseLikeService.isUserLikedPost(userId, postId));
+        dto.setLikeCount(redisBaseLikeService.getPostLikeCount(postId));
+
+        return dto;
     }
 }
