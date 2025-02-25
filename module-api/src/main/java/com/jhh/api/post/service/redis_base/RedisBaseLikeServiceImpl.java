@@ -1,9 +1,14 @@
-package com.jhh.api.post.service;
+package com.jhh.api.post.service.redis_base;
 
+import com.jhh.api.common.exception.NotFoundException;
+import com.jhh.api.common.response.BaseResponseErrorStatus;
 import com.jhh.api.post.dto.CommentLikeDto;
 import com.jhh.api.post.dto.LikeCountDto;
 import com.jhh.api.post.dto.PostLikeDto;
 import com.jhh.api.post.dto.UserLikeDataDto;
+import com.jhh.core.domain.comment.repository.CommentRepository;
+import com.jhh.core.domain.post.repository.PostRepository;
+import com.jhh.core.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,12 +18,22 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
 
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+
     private final RedisTemplate<String, Object> redisTemplate;
     private HashOperations<String, String, UserLikeDataDto> userLikeHashOperations;
     private HashOperations<String, String, LikeCountDto> likeCountHashOperations;
 
     @Override
     public PostLikeDto likePost(Integer userId, Integer postId) {
+        // 포스트와 사용자 엔티티를 먼저 조회
+        postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
+
         String postHash = getPostKey(postId);
         String postHashKey = getPostLikeCountHashKey();
         String userHash = getUserKey(postId);
@@ -41,6 +56,13 @@ public class RedisBaseLikeServiceImpl implements RedisBaseLikeService {
 
     @Override
     public CommentLikeDto likeComment(Integer userId, Integer postId, Integer commentId) {
+        postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
+        commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_COMMENT));
+
         String postHash = getPostKey(postId);
         String commentHashKey = getCommentLikeCountHashKey(commentId);
         String userHash = getUserKey(postId);

@@ -24,8 +24,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers(
-                                        "/api/db-base/test/post/**",
-                                        "/api/redis-base/test/post/**"
+                                        "/api/db-base/test/posts/**",
+                                        "/api/redis-base/test/posts/**"
                                         ).permitAll()
                                 .anyRequest().authenticated()
                 );

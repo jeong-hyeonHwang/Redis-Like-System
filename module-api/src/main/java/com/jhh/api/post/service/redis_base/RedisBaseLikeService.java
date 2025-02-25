@@ -1,4 +1,4 @@
-package com.jhh.api.post.service;
+package com.jhh.api.post.service.redis_base;
 
 import com.jhh.api.post.dto.CommentLikeDto;
 import com.jhh.api.post.dto.PostLikeDto;

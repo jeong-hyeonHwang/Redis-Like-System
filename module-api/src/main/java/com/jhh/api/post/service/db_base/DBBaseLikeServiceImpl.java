@@ -1,5 +1,7 @@
-package com.jhh.api.post.service;
+package com.jhh.api.post.service.db_base;
 
+import com.jhh.api.common.exception.NotFoundException;
+import com.jhh.api.common.response.BaseResponseErrorStatus;
 import com.jhh.api.post.dto.CommentLikeDto;
 import com.jhh.api.post.dto.PostLikeDto;
 import com.jhh.core.domain.comment.Comment;
@@ -41,9 +43,9 @@ public class DBBaseLikeServiceImpl implements DBBaseLikeService {
     public PostLikeDto likePost(Integer userId, Integer postId) {
         // 포스트와 사용자 엔티티를 먼저 조회
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
 
         // 사용자가 해당 포스트에 대해 좋아요한 기록이 있는지 확인
         Optional<UserPostLike> existingUserPostLike = userPostLikeRepository.findByUserIdAndPostId(userId, postId);
@@ -84,11 +86,11 @@ public class DBBaseLikeServiceImpl implements DBBaseLikeService {
     public CommentLikeDto likeComment(Integer userId, Integer postId, Integer commentId) {
         // 1. 댓글, 포스트, 사용자 존재 여부 확인
         postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_POST));
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_COMMENT));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new NotFoundException(BaseResponseErrorStatus.NOT_EXIST_USER));
 
         // 2. 사용자가 해당 댓글에 좋아요한 기록이 있는지 확인
         Optional<UserCommentLike> existingCommentLike = userCommentLikeRepository.findByUserIdAndCommentId(userId, commentId);
